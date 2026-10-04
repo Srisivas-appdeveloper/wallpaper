@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOTSCAPE Studio — Admin Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --card-bg: rgba(22, 22, 26, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --red-accent: #e50914;
+      --red-glow: rgba(229, 9, 20, 0.25);
+      --text: #f0f0f2;
+      --text-muted: #8e8e93;
+      --text-dim: #545458;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(229, 9, 20, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 180, 216, 0.03) 0%, transparent 40%),
+        radial-gradient(#1f1f23 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 24px 24px;
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(10, 10, 12, 0.85);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-logo {
+      width: 14px;
+      height: 14px;
+      background: var(--red-accent);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--red-accent);
+      display: inline-block;
+    }
+    .brand-title {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      letter-spacing: 3px;
+      font-size: 16px;
+    }
+    .brand-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .user-pill {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+    }
+    .btn {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background: var(--text);
+      color: #000;
+    }
+    .btn-primary:hover {
+      background: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.15);
+    }
+    .btn-danger {
+      background: rgba(229, 9, 20, 0.12);
+      border-color: rgba(229, 9, 20, 0.3);
+      color: #ff4d4d;
+    }
+    .btn-danger:hover {
+      background: rgba(229, 9, 20, 0.25);
+    }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--card-border);
+      color: var(--text);
+    }
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px;
+      flex: 1;
+    }
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+    .tab-btn {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 1px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tab-btn.active {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      font-weight: 600;
+    }
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    /* Main Layout */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      .layout-grid { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      backdrop-filter: blur(12px);
+    }
+    .panel-title {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .panel-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--red-accent);
+      border-radius: 50%;
+    }
+    /* Forms */
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.6);
+    }
+    .dropzone {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 28px 16px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--red-accent);
+      background: rgba(229, 9, 20, 0.05);
+    }
+    .dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .dropzone-preview {
+      max-height: 180px;
+      max-width: 100%;
+      border-radius: 8px;
+      display: none;
+      margin: 0 auto 12px;
+      object-fit: cover;
+      border: 1px solid var(--card-border);
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .checkbox-label input {
+      accent-color: var(--red-accent);
+      width: 16px;
+      height: 16px;
+    }
+    /* Catalog Cards */
+    .catalog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 16px;
+    }
+    .wallpaper-card {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .wallpaper-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .card-thumb-wrap {
+      aspect-ratio: 9 / 16;
+      background: #000;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .wallpaper-card:hover .card-thumb {
+      transform: scale(1.03);
+    }
+    .status-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      backdrop-filter: blur(8px);
+    }
+    .status-published {
+      background: rgba(34, 197, 94, 0.25);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+    .status-review {
+      background: rgba(245, 158, 11, 0.25);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .status-unpublished {
+      background: rgba(148, 163, 184, 0.2);
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    .card-body {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .card-actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+    }
+    .card-btn {
+      flex: 1;
+      padding: 6px;
+      font-size: 11px;
+    }
+    /* Login Modal */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-box {
+      background: #111114;
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 36px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8);
+      text-align: center;
+    }
+    .login-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(229, 9, 20, 0.1);
+      border: 1px solid rgba(229, 9, 20, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: var(--red-accent);
+      font-size: 20px;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1a1a20;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+      z-index: 200;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .toast.success { border-color: rgba(34, 197, 94, 0.5); }
+    .toast.error { border-color: rgba(239, 68, 68, 0.5); color: #f87171; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="#" class="brand">
+      <span class="brand-logo"></span>
+      <span class="brand-title">DOTSCAPE</span>
+      <span class="brand-badge">STUDIO</span>
+    </a>
+    <div class="header-actions">
+      <div id="userPill" class="user-pill" style="display:none;"></div>
+      <button id="logoutBtn" class="btn btn-ghost" style="display:none;" onclick="logout()">LOGOUT</button>
+    </div>
+  </header>
+
+  <!-- Login Modal -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-box">
+      <div class="login-icon">●</div>
+      <h2 style="font-family:var(--font-mono); font-size:18px; letter-spacing:2px; margin-bottom:8px;">STUDIO ACCESS</h2>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:24px;">Sign in to manage Nothing phone catalog</p>
+      
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label">Email</label>
+          <input type="email" id="loginEmail" class="form-input" value="admin@dotscape.local" required>
+        </div>
+        <div class="form-group" style="text-align:left;">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="form-input" value="ChangeMe!2026" required>
+        </div>
+        <button type="submit" id="loginSubmitBtn" class="btn btn-primary" style="width:100%; padding:12px; margin-top:8px;">SIGN IN</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Stats Row -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Published Wallpapers</div>
+        <div id="statPublished" class="stat-value">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">In Review</div>
+        <div id="statReview" class="stat-value">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Downloads</div>
+        <div id="statDownloads" class="stat-value">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Users</div>
+        <div id="statUsers" class="stat-value">—</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('upload')">UPLOAD WALLPAPER</button>
+      <button class="tab-btn" onclick="switchTab('catalog')">CATALOG (<span id="catalogCount">0</span>)</button>
+      <button class="tab-btn" onclick="switchTab('generator')">AI GENERATOR</button>
+    </div>
+
+    <!-- TAB 1: Uploader View -->
+    <div id="tabUpload" class="layout-grid">
+      <!-- Upload Panel -->
+      <div class="panel">
+        <div class="panel-title">NEW WALLPAPER UPLOAD</div>
+
+        <form id="uploadForm" onsubmit="handleUpload(event)">
+          <!-- Dropzone -->
+          <div class="dropzone" id="dropzone">
+            <img id="previewImg" class="dropzone-preview" alt="Preview">
+            <div id="dropzoneText">
+              <p style="font-weight:500; font-size:14px; margin-bottom:4px;">Drag & drop image file</p>
+              <p style="font-size:12px; color:var(--text-muted);">or click to browse (.jpg, .png, .webp)</p>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" required onchange="handleFileSelect(event)">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Title *</label>
+            <input type="text" id="titleInput" class="form-input" placeholder="e.g. Liquid Matrix #01" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="categorySelect" class="form-select">
+              <option value="liquid">Liquid</option>
+              <option value="dots">Dot Matrix</option>
+              <option value="minimal">Minimal</option>
+              <option value="aurora">Aurora</option>
+              <option value="cyber">Cyber</option>
+              <option value="abstract">Abstract</option>
+              <option value="nature">Nature</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tags (comma separated)</label>
+            <input type="text" id="tagsInput" class="form-input" placeholder="e.g. minimal, dark, abstract, neon">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Dominant Colors</label>
+            <input type="text" id="colorsInput" class="form-input" placeholder="e.g. purple, cyan, red, black">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description (optional)</label>
+            <textarea id="descInput" class="form-textarea" rows="2" placeholder="Brief wallpaper notes..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="amoledInput" checked>
+              <span>Optimized for AMOLED / Pure Black</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="autoPublishInput" checked>
+              <span>Publish immediately (visible to all users)</span>
+            </label>
+          </div>
+
+          <button type="submit" id="uploadSubmitBtn" class="btn btn-primary" style="width:100%; padding:12px; margin-top:8px;">
+            UPLOAD WALLPAPER
+          </button>
+        </form>
+      </div>
+
+      <!-- Quick Upload Tips / Guidelines -->
+      <div class="panel">
+        <div class="panel-title">GUIDELINES & SPECIFICATIONS</div>
+        <div style="font-size:13px; line-height:1.7; color:var(--text-muted); display:flex; flex-direction:column; gap:16px;">
+          <div>
+            <strong style="color:var(--text); font-family:var(--font-mono);">RECOMMENDED RESOLUTIONS</strong>
+            <p>Nothing Phone (3): 1260 × 2800 (19.5:9)</p>
+            <p>Phone (2/2a/3a): 1080 × 2412</p>
+            <p>Phone (1): 1080 × 2400</p>
+          </div>
+          <div>
+            <strong style="color:var(--text); font-family:var(--font-mono);">AUTOMATIC OPTIMIZATIONS</strong>
+            <p>The backend automatically generates WebP thumbnails, blurred low-res placeholders, and responsive resolution variants using Sharp.</p>
+          </div>
+          <div>
+            <strong style="color:var(--text); font-family:var(--font-mono);">AMOLED TUNING</strong>
+            <p>Check the AMOLED option for wallpapers with pitch black backgrounds (< 5% luminance) to preserve battery life on Nothing OLED displays.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Catalog View -->
+    <div id="tabCatalog" style="display:none;">
+      <div class="catalog-header">
+        <div style="font-family:var(--font-mono); font-size:14px; font-weight:600;">WALLPAPERS FEED</div>
+        <div style="display:flex; gap:10px;">
+          <select id="filterStatus" class="form-select" style="width:auto; padding:6px 12px;" onchange="loadCatalog()">
+            <option value="">All Statuses</option>
+            <option value="published">Published</option>
+            <option value="review">In Review</option>
+            <option value="unpublished">Unpublished</option>
+          </select>
+          <button class="btn btn-ghost" onclick="loadCatalog()">REFRESH</button>
+        </div>
+      </div>
+      <div id="catalogGrid" class="catalog-grid"></div>
+    </div>
+
+    <!-- TAB 3: AI Procedural Generator -->
+    <div id="tabGenerator" style="display:none;" class="panel" style="max-width:600px;">
+      <div class="panel-title">BATCH PROCEDURAL GENERATOR</div>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">
+        Trigger the procedural rendering engine to generate mathematical dot-matrix, liquid, and cyber geometric wallpapers.
+      </p>
+      <form onsubmit="handleBatchGenerate(event)">
+        <div class="form-group">
+          <label class="form-label">Number of Wallpapers (1–12)</label>
+          <input type="number" id="batchCount" class="form-input" value="6" min="1" max="12">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Style Selection</label>
+          <select id="batchStyle" class="form-select">
+            <option value="liquid,dots,cyber">All (Liquid + Dots + Cyber)</option>
+            <option value="liquid">Liquid Only</option>
+            <option value="dots">Dot Matrix Only</option>
+            <option value="cyber">Cyber Geometric Only</option>
+            <option value="aurora">Aurora Only</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="batchAmoled" checked>
+            <span>Pure AMOLED background</span>
+          </label>
+        </div>
+        <button type="submit" id="batchSubmitBtn" class="btn btn-primary" style="padding:12px 24px; margin-top:8px;">
+          RUN BATCH GENERATION
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let token = localStorage.getItem('dotscape_admin_token') || '';
+    let currentUser = null;
+
+    // Toast notifications
+    function showToast(msg, type = 'info') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + type;
+      setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+
+    // Check login state on start
+    window.addEventListener('DOMContentLoaded', () => {
+      if (token) {
+        verifySession();
+      } else {
+        document.getElementById('loginOverlay').style.display = 'flex';
+      }
+    });
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginSubmitBtn');
+      btn.textContent = 'SIGNING IN...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/admin/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Login failed');
+
+        token = data.token;
+        currentUser = data.admin;
+        localStorage.setItem('dotscape_admin_token', token);
+        localStorage.setItem('dotscape_admin_user', JSON.stringify(currentUser));
+        
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('userPill').style.display = 'block';
+        document.getElementById('userPill').textContent = currentUser.email;
+        document.getElementById('logoutBtn').style.display = 'inline-flex';
+        showToast('Signed in successfully', 'success');
+
+        loadStats();
+        loadCatalog();
+        loadCategories();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.textContent = 'SIGN IN';
+        btn.disabled = false;
+      }
+    }
+
+    async function verifySession() {
+      try {
+        const res = await fetch('/admin/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        currentUser = data.admin;
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('userPill').style.display = 'block';
+        document.getElementById('userPill').textContent = currentUser.email;
+        document.getElementById('logoutBtn').style.display = 'inline-flex';
+        loadStats();
+        loadCatalog();
+        loadCategories();
+      } catch {
+        logout();
+      }
+    }
+
+    async function loadCategories() {
+      try {
+        const res = await fetch('/v1/categories');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.items && data.items.length) {
+          const select = document.getElementById('categorySelect');
+          const currentVal = select.value;
+          select.innerHTML = data.items.map(c => 
+            `<option value="${c.id}" ${c.id === currentVal ? 'selected' : ''}>${c.name}</option>`
+          ).join('');
+        }
+      } catch (e) {
+        console.error('Failed to load categories', e);
+      }
+    }
+
+    function logout() {
+      token = '';
+      currentUser = null;
+      localStorage.removeItem('dotscape_admin_token');
+      document.getElementById('loginOverlay').style.display = 'flex';
+      document.getElementById('userPill').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'none';
+    }
+
+    // Tabs
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => {
+        b.classList.toggle('active', ['upload','catalog','generator'][i] === tab);
+      });
+      document.getElementById('tabUpload').style.display = tab === 'upload' ? 'grid' : 'none';
+      document.getElementById('tabCatalog').style.display = tab === 'catalog' ? 'block' : 'none';
+      document.getElementById('tabGenerator').style.display = tab === 'generator' ? 'block' : 'none';
+      if (tab === 'catalog') loadCatalog();
+    }
+
+    // Load Stats
+    async function loadStats() {
+      try {
+        const res = await fetch('/admin/stats', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) return;
+        const { totals } = await res.json();
+        document.getElementById('statPublished').textContent = totals.published ?? 0;
+        document.getElementById('statReview').textContent = totals.in_review ?? 0;
+        document.getElementById('statDownloads').textContent = totals.downloads ?? 0;
+        document.getElementById('statUsers').textContent = totals.users ?? 0;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Dropzone preview
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = document.getElementById('previewImg');
+          img.src = event.target.result;
+          img.style.display = 'block';
+          document.getElementById('dropzoneText').style.display = 'none';
+          if (!document.getElementById('titleInput').value) {
+            const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+            document.getElementById('titleInput').value = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Upload
+    async function handleUpload(e) {
+      e.preventDefault();
+      const file = document.getElementById('fileInput').files[0];
+      if (!file) {
+        showToast('Please select an image file', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('uploadSubmitBtn');
+      btn.textContent = 'UPLOADING & PROCESSING...';
+      btn.disabled = true;
+
+      try {
+        const formData = new FormData();
+        // Append text fields FIRST for Fastify streaming multipart parser!
+        formData.append('title', document.getElementById('titleInput').value.trim());
+        formData.append('description', document.getElementById('descInput').value.trim());
+        formData.append('categoryId', document.getElementById('categorySelect').value);
+        formData.append('tags', document.getElementById('tagsInput').value.trim());
+        formData.append('colors', document.getElementById('colorsInput').value.trim());
+        formData.append('isAmoled', document.getElementById('amoledInput').checked ? 'true' : 'false');
+        formData.append('file', file);
+
+        const res = await fetch('/admin/wallpapers/upload', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Upload failed');
+
+        const wallpaperId = data.wallpaper.id;
+
+        // Auto-publish if requested
+        if (document.getElementById('autoPublishInput').checked) {
+          await fetch(`/admin/wallpapers/${wallpaperId}/publish`, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: '{}'
+          });
+          showToast('Uploaded and published successfully!', 'success');
+        } else {
+          showToast('Uploaded to review successfully!', 'success');
+        }
+
+        // Reset form
+        document.getElementById('uploadForm').reset();
+        document.getElementById('previewImg').style.display = 'none';
+        document.getElementById('dropzoneText').style.display = 'block';
+        loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.textContent = 'UPLOAD WALLPAPER';
+        btn.disabled = false;
+      }
+    }
+
+    // Catalog
+    async function loadCatalog() {
+      const grid = document.getElementById('catalogGrid');
+      grid.innerHTML = '<div style="color:var(--text-muted); font-family:var(--font-mono);">Loading wallpapers...</div>';
+      const status = document.getElementById('filterStatus').value;
+      const url = status ? `/admin/wallpapers?status=${status}&limit=40` : '/admin/wallpapers?limit=40';
+
+      try {
+        const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await res.json();
+        const items = data.items || [];
+        document.getElementById('catalogCount').textContent = items.length;
+
+        if (items.length === 0) {
+          grid.innerHTML = '<div style="color:var(--text-muted); font-family:var(--font-mono);">No wallpapers found.</div>';
+          return;
+        }
+
+        grid.innerHTML = items.map(w => `
+          <div class="wallpaper-card">
+            <div class="card-thumb-wrap">
+              <img src="${w.thumbnailUrl}" class="card-thumb" alt="${w.title}" loading="lazy">
+              <span class="status-badge status-${w.status}">${w.status}</span>
+            </div>
+            <div class="card-body">
+              <div class="card-title">${w.title}</div>
+              <div class="card-meta">
+                <span>${w.categoryId || 'General'}</span>
+                <span>${w.downloads || 0} DL</span>
+              </div>
+              <div class="card-actions">
+                ${w.status !== 'published' ? `
+                  <button class="btn btn-primary card-btn" onclick="publishWallpaper('${w.id}')">PUBLISH</button>
+                ` : `
+                  <button class="btn btn-danger card-btn" onclick="unpublishWallpaper('${w.id}')">UNPUBLISH</button>
+                `}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        grid.innerHTML = '<div style="color:var(--red-accent);">Failed to load catalog.</div>';
+      }
+    }
+
+    async function publishWallpaper(id) {
+      try {
+        const res = await fetch(`/admin/wallpapers/${id}/publish`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: '{}'
+        });
+        if (!res.ok) throw new Error('Publish failed');
+        showToast('Wallpaper published to app!', 'success');
+        loadCatalog();
+        loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function unpublishWallpaper(id) {
+      try {
+        const res = await fetch(`/admin/wallpapers/${id}/unpublish`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Unpublish failed');
+        showToast('Wallpaper unpublished', 'info');
+        loadCatalog();
+        loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // Batch generate
+    async function handleBatchGenerate(e) {
+      e.preventDefault();
+      const count = parseInt(document.getElementById('batchCount').value, 10) || 6;
+      const styles = document.getElementById('batchStyle').value.split(',');
+      const amoled = document.getElementById('batchAmoled').checked;
+      const btn = document.getElementById('batchSubmitBtn');
+      btn.textContent = 'GENERATING...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/admin/wallpapers/generate-batch', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            count,
+            styles,
+            colors: ['purple', 'cyan', 'orange', 'red', 'blue'],
+            amoled
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Generation failed');
+        showToast(`Generated ${data.completed} wallpapers!`, 'success');
+        loadStats();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.textContent = 'RUN BATCH GENERATION';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
