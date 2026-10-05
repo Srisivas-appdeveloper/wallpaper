@@ -14,6 +14,9 @@ const schema = z.object({
   CORS_ORIGINS: z.string().default('http://localhost:3000'),
   SEED_ADMIN_EMAIL: z.string().email().default('admin@dotscape.local'),
   SEED_ADMIN_PASSWORD: z.string().min(8).default('ChangeMe!2026'),
+  SUPABASE_URL: z.string().url().default('https://rcegfuwlunoxmeffarhu.supabase.co'),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY is required'),
+  STORAGE_PROVIDER: z.enum(['local', 'supabase']).default('supabase'),
 });
 
 const parsed = schema.safeParse(process.env);

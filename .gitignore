@@ -1,2 +1,50 @@
+# macOS (PortableSSD also writes AppleDouble sidecars)
 .DS_Store
 ._*
+.AppleDouble
+.LSOverride
+
+# Secrets — keep *.example tracked
+.env
+.env.*
+!.env.example
+!.env*.example
+
+# Node / Next
+node_modules/
+dist/
+.next/
+out/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Backend wallpaper files
+storage/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+coverage/
+**/doc/api/
+
+# Android / IDE build output
+local.properties
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+*.iml
+.idea/
+key.properties
+**/*.keystore
+**/*.jks
+.cxx/
+
+# Archives
+*.zip
