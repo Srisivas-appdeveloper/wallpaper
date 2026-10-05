@@ -40,8 +40,9 @@ class NoopAdsService implements AdsService {
 
   @override
   Future<void> onFlowCompleted(AdPlacement placement) async {
-    if (_policy.shouldShow(DateTime.now()))
+    if (_policy.shouldShow(DateTime.now())) {
       debugPrint('[ads] interstitial slot reached: ${placement.name}');
+    }
   }
 }
 

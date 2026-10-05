@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/errors/app_exception.dart';
@@ -13,8 +15,9 @@ Future<T?> runWithProgress<T>(
   final navigator = Navigator.of(context, rootNavigator: true);
   final messenger = ScaffoldMessenger.of(context);
 
-  showDialog<void>(
-    context: context,
+  unawaited(
+    showDialog<void>(
+      context: context,
     useRootNavigator: true,
     barrierDismissible: false,
     builder: (_) => PopScope(
@@ -39,13 +42,14 @@ Future<T?> runWithProgress<T>(
         ),
       ),
     ),
-  );
+  ));
 
   try {
     final result = await task();
     navigator.pop();
-    if (successMessage != null)
+    if (successMessage != null) {
       messenger.showSnackBar(SnackBar(content: Text(successMessage)));
+    }
     return result;
   } on Object catch (error) {
     navigator.pop();

@@ -13,13 +13,19 @@ class DeviceRepository {
 
   final ApiClient _api;
 
-  /// Backend owns the device table (spec §11): never rely on hardcoded model strings in the app.
+  /// Resolves device profile against Supabase devices table or falls back to snapshot.
   Future<DeviceProfile> resolve(DeviceSnapshot snapshot) async {
-    final json = await _api.get(
-      '/v1/devices/resolve',
-      query: snapshot.toQuery(),
-    );
-    return DeviceProfile.fromJson(json['device'] as Map<String, dynamic>);
+    try {
+      final list = await _api.getList('/devices', query: {
+        'brand': 'ilike.${snapshot.manufacturer}',
+        'model': 'ilike.${snapshot.model}',
+        'limit': 1,
+      });
+      if (list.isNotEmpty && list.first is Map<String, dynamic>) {
+        return DeviceProfile.fromJson(list.first as Map<String, dynamic>);
+      }
+    } catch (_) {}
+    return offlineFallback(snapshot);
   }
 
   DeviceProfile offlineFallback(DeviceSnapshot snapshot) => DeviceProfile(

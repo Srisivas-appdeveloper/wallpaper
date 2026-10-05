@@ -34,11 +34,18 @@ storage/
 coverage/
 **/doc/api/
 
-# Android / IDE build output
+# Android / Flutter build output & artifacts
 local.properties
 **/android/app/debug
 **/android/app/profile
 **/android/app/release
+*.apk
+*.aab
+*.ap_
+*.xapk
+**/build/
+build/
+dotscape-app/build
 *.iml
 .idea/
 key.properties

@@ -34,14 +34,16 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       ref.read(exploreFiltersProvider.notifier).setQuery(value);
-      if (value.trim().isNotEmpty)
+      if (value.trim().isNotEmpty) {
         ref.read(analyticsProvider).track(AnalyticsEvent.search);
+      }
     });
   }
 
   bool _onScroll(ScrollNotification notification) {
-    if (notification.metrics.extentAfter < 600)
+    if (notification.metrics.extentAfter < 600) {
       ref.read(exploreResultsProvider.notifier).loadMore();
+    }
     return false;
   }
 

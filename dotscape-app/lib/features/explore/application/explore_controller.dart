@@ -80,8 +80,9 @@ class ExploreResultsController extends AsyncNotifier<WallpaperPage> {
 
   Future<void> loadMore() async {
     final current = state.value;
-    if (current == null || !current.hasMore || _loadingMore || state.isLoading)
+    if (current == null || !current.hasMore || _loadingMore || state.isLoading) {
       return;
+    }
     final filters = ref.read(exploreFiltersProvider);
     _loadingMore = true;
     try {
@@ -90,8 +91,9 @@ class ExploreResultsController extends AsyncNotifier<WallpaperPage> {
         ref.read(currentDeviceProvider)?.id,
         offset: current.nextOffset!,
       );
-      if (identical(filters, ref.read(exploreFiltersProvider)))
+      if (identical(filters, ref.read(exploreFiltersProvider))) {
         state = AsyncData(current.append(next));
+      }
     } on AppException {
       // Keep the current page; the next scroll retries.
     } finally {

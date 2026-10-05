@@ -13,10 +13,12 @@ final dioProvider = Provider<Dio>((ref) {
   final config = ref.watch(appConfigProvider);
   final dio = Dio(
     BaseOptions(
-      baseUrl: config.apiBaseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 90),
+      baseUrl: '${config.supabaseUrl}/rest/v1',
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 60),
       headers: {
+        'apikey': config.supabaseAnonKey,
+        'Authorization': 'Bearer ${config.supabaseAnonKey}',
         'x-install-id': ref.watch(installIdProvider),
         'accept': 'application/json',
       },
@@ -38,31 +40,69 @@ final apiClientProvider = Provider<ApiClient>(
   (ref) => ApiClient(ref.watch(dioProvider)),
 );
 
-/// Thin HTTP layer: JSON in/out, every failure mapped to [AppException].
+/// HTTP layer for direct Supabase PostgREST & Cloudflare CDN interactions.
 class ApiClient {
   ApiClient(this._dio);
 
   final Dio _dio;
 
+  Future<List<dynamic>> getList(
+    String path, {
+    Map<String, Object?>? query,
+    Map<String, String>? headers,
+  }) async {
+    final response = await _guard(
+      () => _dio.get<dynamic>(
+        path,
+        queryParameters: _clean(query),
+        options: headers != null ? Options(headers: headers) : null,
+      ),
+    );
+    final data = response.data;
+    if (data is List) return data;
+    return const [];
+  }
+
   Future<Map<String, dynamic>> get(
     String path, {
     Map<String, Object?>? query,
+    Map<String, String>? headers,
   }) async {
     final response = await _guard(
-      () =>
-          _dio.get<Map<String, dynamic>>(path, queryParameters: _clean(query)),
+      () => _dio.get<dynamic>(
+        path,
+        queryParameters: _clean(query),
+        options: headers != null ? Options(headers: headers) : null,
+      ),
     );
-    return response.data ?? const {};
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return data;
+    } else if (data is List &&
+        data.isNotEmpty &&
+        data.first is Map<String, dynamic>) {
+      return data.first as Map<String, dynamic>;
+    }
+    return const {};
   }
 
   Future<Map<String, dynamic>> post(
     String path, {
     Map<String, Object?>? body,
+    Map<String, String>? headers,
   }) async {
     final response = await _guard(
-      () => _dio.post<Map<String, dynamic>>(path, data: body),
+      () => _dio.post<dynamic>(
+        path,
+        data: body,
+        options: headers != null ? Options(headers: headers) : null,
+      ),
     );
-    return response.data ?? const {};
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+    return const {};
   }
 
   /// Downloads into the temp directory once and reuses the cached file afterwards.

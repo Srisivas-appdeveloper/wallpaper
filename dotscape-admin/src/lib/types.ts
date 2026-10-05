@@ -31,10 +31,9 @@ export interface Wallpaper {
 export interface Category {
   id: string;
   name: string;
-  slug: string;
-  display_order: number;
-  is_active: boolean;
+  sort_order: number;
 }
+
 
 export interface Device {
   id: string;

@@ -14,12 +14,16 @@ export default function CategoriesPage() {
   const [loading, setLoading] = useState(false);
 
   const loadData = async () => {
-    const [cRes, dRes] = await Promise.all([
-      supabase.from('categories').select('*').order('display_order', { ascending: true }),
-      supabase.from('devices').select('*').order('brand', { ascending: true })
-    ]);
-    if (cRes.data) setCategories(cRes.data);
-    if (dRes.data) setDevices(dRes.data);
+    try {
+      const [cRes, dRes] = await Promise.all([
+        fetch('/api/categories').then(r => r.json()),
+        supabase.from('devices').select('*').order('brand', { ascending: true })
+      ]);
+      if (Array.isArray(cRes)) setCategories(cRes);
+      if (dRes.data) setDevices(dRes.data);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   useEffect(() => {
@@ -36,33 +40,34 @@ export default function CategoriesPage() {
     if (!newCatName.trim() || !newCatSlug.trim()) return;
 
     setLoading(true);
-    const { data, error } = await supabase.from('categories').insert({
-      id: newCatSlug.trim(),
-      name: newCatName.trim(),
-      slug: newCatSlug.trim(),
-      display_order: categories.length + 1,
-      is_active: true,
-    }).select();
+    const res = await fetch('/api/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newCatName.trim(), slug: newCatSlug.trim() }),
+    });
 
     setLoading(false);
-    if (error) {
-      alert('Error creating category: ' + error.message);
-    } else if (data) {
-      setCategories(prev => [...prev, data[0] as Category]);
+    if (res.ok) {
+      const data = await res.json();
+      setCategories(prev => [...prev, data as Category]);
       setNewCatName('');
       setNewCatSlug('');
+    } else {
+      const err = await res.json();
+      alert('Error creating category: ' + (err.error || 'Failed'));
     }
   };
 
   const deleteCategory = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete category "${name}"?`)) return;
-    const { error } = await supabase.from('categories').delete().eq('id', id);
-    if (!error) {
+    const res = await fetch(`/api/categories?id=${id}`, { method: 'DELETE' });
+    if (res.ok) {
       setCategories(prev => prev.filter(c => c.id !== id));
     } else {
-      alert('Error deleting: ' + error.message);
+      alert('Error deleting category');
     }
   };
+
 
   return (
     <div>
@@ -86,14 +91,15 @@ export default function CategoriesPage() {
                   <div key={c.id} className="py-3 px-3 flex items-center justify-between hover:bg-white/5 rounded-lg transition font-mono">
                     <div>
                       <div className="text-xs font-bold text-white">{c.name}</div>
-                      <div className="text-[10px] text-zinc-500">ID / slug: {c.slug} • Order: {c.display_order}</div>
+                      <div className="text-[10px] text-zinc-500">ID: {c.id} • Sort Order: {c.sort_order}</div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span className={`text-[9px] px-2 py-0.5 rounded border ${c.is_active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-zinc-800 text-zinc-500 border-zinc-700'}`}>
-                        {c.is_active ? 'ACTIVE' : 'INACTIVE'}
+                      <span className="text-[9px] px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                        ACTIVE
                       </span>
                       <button
+
                         onClick={() => deleteCategory(c.id, c.name)}
                         className="p-1 rounded hover:bg-red-500/20 text-zinc-600 hover:text-red-400 transition"
                       >

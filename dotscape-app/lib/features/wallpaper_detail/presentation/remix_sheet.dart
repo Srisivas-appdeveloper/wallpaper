@@ -27,8 +27,9 @@ Future<void> startRemix(
     () => ref.read(generationRepositoryProvider).remix(wallpaper.id, request),
     label: 'Remixing…',
   );
-  if (result != null && context.mounted)
-    context.push(Routes.wallpaper(result.id), extra: result);
+  if (result != null && context.mounted) {
+    await context.push(Routes.wallpaper(result.id), extra: result);
+  }
 }
 
 class RemixSheet extends StatefulWidget {

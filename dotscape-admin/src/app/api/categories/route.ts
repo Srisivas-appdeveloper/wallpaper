@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const rows = await sql`
-      SELECT * FROM categories ORDER BY display_order ASC;
+      SELECT id, name, sort_order FROM categories ORDER BY sort_order ASC;
     `;
     return NextResponse.json(rows);
   } catch (err: any) {
@@ -20,15 +20,16 @@ export async function POST(request: Request) {
     const { name, slug } = await request.json();
     if (!name || !slug) return NextResponse.json({ error: 'Missing name or slug' }, { status: 400 });
 
-    const [maxOrder] = await sql`SELECT coalesce(max(display_order), 0)::int as max_order FROM categories;`;
+    const [maxOrder] = await sql`SELECT coalesce(max(sort_order), 0)::int as max_order FROM categories;`;
 
     const [inserted] = await sql`
-      INSERT INTO categories (id, name, slug, display_order, is_active)
-      VALUES (${slug}, ${name}, ${slug}, ${maxOrder.max_order + 1}, true)
+      INSERT INTO categories (id, name, sort_order)
+      VALUES (${slug}, ${name}, ${maxOrder.max_order + 1})
       RETURNING *;
     `;
 
     return NextResponse.json(inserted);
+
   } catch (err: any) {
     console.error('Category creation failed:', err);
     return NextResponse.json({ error: err.message }, { status: 500 });

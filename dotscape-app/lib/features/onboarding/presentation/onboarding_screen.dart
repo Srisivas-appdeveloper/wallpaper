@@ -121,7 +121,7 @@ class _DeviceStep extends ConsumerWidget {
         const SizedBox(height: 12),
         detected.when(
           loading: () => const Text('Looking at your phone…'),
-          error: (_, __) => const Text('your phone'),
+          error: (err, stack) => const Text('your phone'),
           data: (device) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

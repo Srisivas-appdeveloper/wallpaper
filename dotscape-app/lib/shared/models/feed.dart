@@ -26,6 +26,12 @@ class FeedSection {
   final String id;
   final String title;
   final List<Wallpaper> items;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'items': items.map((w) => w.toJson()).toList(),
+  };
 }
 
 @immutable
@@ -57,6 +63,11 @@ class HomeFeed {
   final Wallpaper? hero;
   final List<FeedSection> sections;
   final bool isFromCache;
+
+  Map<String, dynamic> toJson() => {
+    'hero': hero?.toJson(),
+    'sections': sections.map((s) => s.toJson()).toList(),
+  };
 }
 
 @immutable
@@ -91,10 +102,19 @@ class WallpaperCategory {
       WallpaperCategory(
         id: json['id'] as String,
         name: json['name'] as String? ?? '',
-        wallpaperCount: (json['wallpaperCount'] as num?)?.toInt() ?? 0,
+        wallpaperCount:
+            ((json['wallpaperCount'] ?? json['wallpaper_count']) as num?)
+                ?.toInt() ??
+            0,
       );
 
   final String id;
   final String name;
   final int wallpaperCount;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'wallpaperCount': wallpaperCount,
+  };
 }

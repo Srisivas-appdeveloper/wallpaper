@@ -21,6 +21,35 @@ void main() {
       expect(wallpaper.width, 1080);
     });
 
+    test('parses direct Supabase Cloud JSON with storage keys and snake_case', () {
+      final wallpaper = Wallpaper.fromJson({
+        'id': '7003aafc-a222-463d-abdf-1487d98228e2',
+        'title': 'Calm Liquid 919',
+        'status': 'published',
+        'category_id': 'liquid',
+        'is_amoled': true,
+        'thumbnail_key': 'wallpapers/7003aafc-a222-463d-abdf-1487d98228e2/thumb.webp',
+        'preview_key': 'wallpapers/7003aafc-a222-463d-abdf-1487d98228e2/preview.webp',
+        'full_key': 'wallpapers/7003aafc-a222-463d-abdf-1487d98228e2/full.jpg',
+        'download_count': 42,
+        'apply_count': 12,
+        'colors': ['blue', 'pink'],
+      });
+      expect(wallpaper.id, '7003aafc-a222-463d-abdf-1487d98228e2');
+      expect(wallpaper.categoryId, 'liquid');
+      expect(wallpaper.isAmoled, isTrue);
+      expect(wallpaper.downloadCount, 42);
+      expect(wallpaper.applyCount, 12);
+      expect(
+        wallpaper.thumbnailUrl,
+        'https://rcegfuwlunoxmeffarhu.supabase.co/storage/v1/object/public/wallpapers/7003aafc-a222-463d-abdf-1487d98228e2/thumb.webp',
+      );
+      expect(
+        wallpaper.fullUrl,
+        'https://rcegfuwlunoxmeffarhu.supabase.co/storage/v1/object/public/wallpapers/7003aafc-a222-463d-abdf-1487d98228e2/full.jpg',
+      );
+    });
+
     test('round-trips through toJson', () {
       const original = Wallpaper(
         id: 'x',

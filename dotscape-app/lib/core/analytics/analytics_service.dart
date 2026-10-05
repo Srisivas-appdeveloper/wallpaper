@@ -34,7 +34,7 @@ class AnalyticsService {
         '/v1/events',
         body: {
           'type': type,
-          if (wallpaperId != null) 'wallpaperId': wallpaperId,
+          'wallpaper_id': ?wallpaperId,
         },
       );
     } on Object {

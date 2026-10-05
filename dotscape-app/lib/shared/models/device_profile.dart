@@ -19,13 +19,23 @@ class DeviceProfile {
     id: json['id'] as String,
     brand: json['brand'] as String? ?? '',
     model: json['model'] as String? ?? '',
-    marketingName: json['marketingName'] as String? ?? 'your phone',
-    screenWidth: (json['screenWidth'] as num?)?.toInt() ?? 1080,
-    screenHeight: (json['screenHeight'] as num?)?.toInt() ?? 2400,
-    safeTop: (json['safeTop'] as num?)?.toDouble() ?? 0.1,
-    safeBottom: (json['safeBottom'] as num?)?.toDouble() ?? 0.08,
-    supportsGlyph: json['supportsGlyph'] as bool? ?? false,
-    isGeneric: json['isGeneric'] as bool? ?? false,
+    marketingName:
+        (json['marketingName'] ?? json['marketing_name']) as String? ??
+        'your phone',
+    screenWidth:
+        ((json['screenWidth'] ?? json['screen_width']) as num?)?.toInt() ??
+        1080,
+    screenHeight:
+        ((json['screenHeight'] ?? json['screen_height']) as num?)?.toInt() ??
+        2400,
+    safeTop:
+        ((json['safeTop'] ?? json['safe_top']) as num?)?.toDouble() ?? 0.1,
+    safeBottom:
+        ((json['safeBottom'] ?? json['safe_bottom']) as num?)?.toDouble() ??
+        0.08,
+    supportsGlyph:
+        (json['supportsGlyph'] ?? json['supports_glyph']) as bool? ?? false,
+    isGeneric: (json['isGeneric'] ?? json['is_generic']) as bool? ?? false,
   );
 
   final String id;

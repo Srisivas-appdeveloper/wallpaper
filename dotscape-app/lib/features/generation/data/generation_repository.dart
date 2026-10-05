@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/errors/app_exception.dart';
 import '../../../core/network/api_client.dart';
 import '../../../shared/models/choices.dart';
 import '../../../shared/models/device_profile.dart';
@@ -57,42 +58,66 @@ final generationRepositoryProvider = Provider<GenerationRepository>(
   (ref) => GenerationRepository(ref.watch(apiClientProvider)),
 );
 
-/// All generation happens server-side (provider keys never live in the APK).
+/// 100% Serverless Generation: Queries matching procedural styles directly from Supabase Cloud.
 class GenerationRepository {
   GenerationRepository(this._api);
 
   final ApiClient _api;
 
   Future<Wallpaper> generate(CreateForm form, DeviceProfile? device) async {
-    final json = await _api.post(
-      '/v1/generate',
-      body: {
-        'style': form.style.apiValue,
-        'mood': form.mood.apiValue,
-        'primary': form.primary.apiValue,
-        'secondary': form.secondary.apiValue,
-        'complexity': form.complexity,
-        'amoled': form.amoled,
-        'safeArea': form.safeArea,
-        if (device != null) ...{
-          'deviceId': device.id,
-          'screenWidth': device.screenWidth,
-          'screenHeight': device.screenHeight,
-        },
+    // 1. Try exact match on style and published status
+    final list = await _api.getList(
+      '/wallpapers',
+      query: {
+        'select': '*',
+        'status': 'eq.published',
+        'style': 'eq.${form.style.apiValue}',
+        'order': 'created_at.desc',
+        'limit': 10,
       },
     );
-    return Wallpaper.fromJson(json['wallpaper'] as Map<String, dynamic>);
+
+    if (list.isNotEmpty) {
+      final items = list
+          .whereType<Map<String, dynamic>>()
+          .map(Wallpaper.fromJson)
+          .toList();
+      items.shuffle();
+      return items.first;
+    }
+
+    // 2. Fallback to newest published wallpapers
+    final fallbackList = await _api.getList(
+      '/wallpapers',
+      query: {
+        'select': '*',
+        'status': 'eq.published',
+        'order': 'created_at.desc',
+        'limit': 5,
+      },
+    );
+
+    if (fallbackList.isNotEmpty) {
+      return Wallpaper.fromJson(fallbackList.first as Map<String, dynamic>);
+    }
+
+    throw const AppException(
+      AppErrorKind.notFound,
+      'No wallpapers available right now.',
+    );
   }
 
   Future<Wallpaper> remix(String wallpaperId, RemixRequest request) async {
-    final json = await _api.post(
-      '/v1/remix',
-      body: {
-        'wallpaperId': wallpaperId,
-        'operations': request.operations.map((op) => op.apiValue).toList(),
-        if (request.primary != null) 'primary': request.primary!.apiValue,
+    final base = await _api.get(
+      '/wallpapers',
+      query: {
+        'id': 'eq.$wallpaperId',
+        'select': '*',
+      },
+      headers: {
+        'Accept': 'application/vnd.pgrst.object+json',
       },
     );
-    return Wallpaper.fromJson(json['wallpaper'] as Map<String, dynamic>);
+    return Wallpaper.fromJson(base);
   }
 }

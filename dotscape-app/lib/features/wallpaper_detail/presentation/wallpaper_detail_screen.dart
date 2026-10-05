@@ -45,8 +45,9 @@ class _WallpaperDetailScreenState extends ConsumerState<WallpaperDetailScreen> {
       previous,
       next,
     ) {
-      if (next case AsyncData(:final value))
+      if (next case AsyncData(:final value)) {
         ref.read(historyProvider.notifier).addToTop(value);
+      }
     }, fireImmediately: true);
   }
 

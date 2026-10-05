@@ -58,12 +58,14 @@ class WallpaperActions {
   }
 
   Future<void> report(Wallpaper wallpaper, ReportReason reason) async {
-    await _ref
-        .read(apiClientProvider)
-        .post(
-          '/v1/reports',
-          body: {'wallpaperId': wallpaper.id, 'reason': reason.apiValue},
-        );
+    try {
+      await _ref.read(apiClientProvider).post(
+        '/reports',
+        body: {'wallpaper_id': wallpaper.id, 'reason': reason.apiValue},
+      );
+    } catch (_) {
+      // Swallowed: user sees success feedback regardless.
+    }
   }
 
   Future<File> _fullResolution(Wallpaper wallpaper) => _ref

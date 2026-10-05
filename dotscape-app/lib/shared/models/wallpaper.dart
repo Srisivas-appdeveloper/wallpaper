@@ -23,26 +23,54 @@ class Wallpaper {
     this.applyCount = 0,
   });
 
-  factory Wallpaper.fromJson(Map<String, dynamic> json) => Wallpaper(
-    id: json['id'] as String,
-    title: json['title'] as String? ?? 'Untitled',
-    description: json['description'] as String? ?? '',
-    categoryId: json['categoryId'] as String?,
-    style: json['style'] as String?,
-    mood: json['mood'] as String?,
-    colors: _strings(json['colors']),
-    tags: _strings(json['tags']),
-    deviceIds: _strings(json['deviceIds']),
-    isAmoled: json['isAmoled'] as bool? ?? false,
-    remixable: json['remixable'] as bool? ?? false,
-    width: (json['width'] as num?)?.toInt() ?? 1080,
-    height: (json['height'] as num?)?.toInt() ?? 2400,
-    thumbnailUrl: json['thumbnailUrl'] as String? ?? '',
-    previewUrl: json['previewUrl'] as String? ?? '',
-    fullUrl: json['fullUrl'] as String? ?? '',
-    downloadCount: (json['downloadCount'] as num?)?.toInt() ?? 0,
-    applyCount: (json['applyCount'] as num?)?.toInt() ?? 0,
-  );
+  factory Wallpaper.fromJson(Map<String, dynamic> json) {
+    const storageBase =
+        'https://rcegfuwlunoxmeffarhu.supabase.co/storage/v1/object/public/wallpapers/';
+
+    String resolveUrl(String? direct, String? key) {
+      if (direct != null && direct.isNotEmpty) return direct;
+      if (key != null && key.isNotEmpty) {
+        final clean = key.replaceFirst(RegExp(r'^wallpapers/'), '');
+        return '$storageBase$clean';
+      }
+      return '';
+    }
+
+    return Wallpaper(
+      id: json['id'] as String,
+      title: json['title'] as String? ?? 'Untitled',
+      description: json['description'] as String? ?? '',
+      categoryId: (json['categoryId'] ?? json['category_id']) as String?,
+      style: json['style'] as String?,
+      mood: json['mood'] as String?,
+      colors: _strings(json['colors']),
+      tags: _strings(json['tags']),
+      deviceIds: _strings(json['deviceIds'] ?? json['device_ids']),
+      isAmoled: (json['isAmoled'] ?? json['is_amoled']) as bool? ?? false,
+      remixable: (json['remixable'] ?? (json['dna'] != null)) as bool? ?? false,
+      width: (json['width'] as num?)?.toInt() ?? 1080,
+      height: (json['height'] as num?)?.toInt() ?? 2400,
+      thumbnailUrl: resolveUrl(
+        json['thumbnailUrl'] as String?,
+        json['thumbnail_key'] as String?,
+      ),
+      previewUrl: resolveUrl(
+        json['previewUrl'] as String?,
+        json['preview_key'] as String?,
+      ),
+      fullUrl: resolveUrl(
+        json['fullUrl'] as String?,
+        json['full_key'] as String?,
+      ),
+      downloadCount:
+          ((json['downloadCount'] ?? json['download_count']) as num?)
+              ?.toInt() ??
+          0,
+      applyCount:
+          ((json['applyCount'] ?? json['apply_count']) as num?)?.toInt() ?? 0,
+    );
+  }
+
 
   final String id;
   final String title;

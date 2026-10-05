@@ -23,35 +23,68 @@ class CatalogRepository {
     int offset = 0,
     int limit = 24,
   }) async {
-    final json = await _api.get(
-      '/v1/wallpapers',
-      query: {
-        'q': query,
-        'categoryId': categoryId,
-        'color': color,
-        'amoled': amoledOnly ? 'true' : null,
-        'deviceId': deviceId,
-        'deviceStrict': deviceStrict ? 'true' : null,
-        'offset': offset,
-        'limit': limit,
-      },
-    );
-    return WallpaperPage.fromJson(json);
+    final Map<String, Object?> params = {
+      'select': '*',
+      'status': 'eq.published',
+      'order': 'created_at.desc',
+      'offset': offset,
+      'limit': limit,
+    };
+
+    if (categoryId != null &&
+        categoryId.isNotEmpty &&
+        categoryId.toLowerCase() != 'all') {
+      params['category_id'] = 'eq.$categoryId';
+    }
+
+    if (amoledOnly) {
+      params['is_amoled'] = 'eq.true';
+    }
+
+    if (query != null && query.trim().isNotEmpty) {
+      final q = query.trim();
+      params['title'] = 'ilike.*$q*';
+    }
+
+    if (color != null && color.isNotEmpty) {
+      params['colors'] = 'cs.{"$color"}';
+    }
+
+    final list = await _api.getList('/wallpapers', query: params);
+    final items = list
+        .whereType<Map<String, dynamic>>()
+        .map(Wallpaper.fromJson)
+        .toList(growable: false);
+
+    final nextOffset = items.length == limit ? offset + limit : null;
+    return WallpaperPage(items: items, nextOffset: nextOffset);
   }
 
   Future<Wallpaper> byId(String id) async {
-    final json = await _api.get('/v1/wallpapers/$id');
-    return Wallpaper.fromJson(json['wallpaper'] as Map<String, dynamic>);
+    final json = await _api.get(
+      '/wallpapers',
+      query: {
+        'id': 'eq.$id',
+        'select': '*',
+      },
+      headers: {
+        'Accept': 'application/vnd.pgrst.object+json',
+      },
+    );
+    return Wallpaper.fromJson(json);
   }
 
   Future<List<WallpaperCategory>> categories() async {
-    final json = await _api.get('/v1/categories');
-    final items = json['items'];
-    return items is List
-        ? items
-              .whereType<Map<String, dynamic>>()
-              .map(WallpaperCategory.fromJson)
-              .toList()
-        : const [];
+    final list = await _api.getList(
+      '/categories',
+      query: {
+        'select': '*',
+        'order': 'sort_order.asc',
+      },
+    );
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map(WallpaperCategory.fromJson)
+        .toList();
   }
 }
