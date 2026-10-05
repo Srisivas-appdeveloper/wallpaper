@@ -1,4 +1,4 @@
 import 'app/bootstrap.dart';
 import 'app/config/app_config.dart';
 
-Future<void> main() => bootstrap(AppConfig.staging());
+Future<void> main() => bootstrap(AppConfig.prod());

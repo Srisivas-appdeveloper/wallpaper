@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/ads/ads_service.dart';
 import '../../../core/storage/local_store.dart';
 import '../../../shared/models/choices.dart';
 import '../../../shared/models/wallpaper.dart';
@@ -39,8 +40,14 @@ class GenerationController extends Notifier<AsyncValue<Wallpaper?>> {
     final form = ref.read(createFormProvider);
     final device = ref.read(currentDeviceProvider);
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
+    final result = await AsyncValue.guard(
       () => ref.read(generationRepositoryProvider).generate(form, device),
     );
+    state = result;
+    if (result.hasValue && result.value != null) {
+      await ref
+          .read(adsServiceProvider)
+          .onFlowCompleted(AdPlacement.afterCreate);
+    }
   }
 }

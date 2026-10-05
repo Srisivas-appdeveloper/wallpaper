@@ -60,10 +60,11 @@ class AppConfig {
   final String supabaseUrl;
   final String supabaseAnonKey;
 
-  String get apiBaseUrl => '$supabaseUrl/rest/v1';
+  factory AppConfig() => AppConfig.prod();
 
-  bool get enableHttpLogs => flavor == Flavor.dev;
-  bool get showFlavorBanner => flavor != Flavor.prod;
+  String get apiBaseUrl => '$supabaseUrl/rest/v1';
+  bool get enableHttpLogs => false;
+  bool get showFlavorBanner => false;
 }
 
 final appConfigProvider = Provider<AppConfig>(

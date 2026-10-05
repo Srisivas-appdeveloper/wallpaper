@@ -55,6 +55,7 @@ class WallpaperActions {
     _ref
         .read(analyticsProvider)
         .track(AnalyticsEvent.share, wallpaperId: wallpaper.id);
+    await _ref.read(adsServiceProvider).onFlowCompleted(AdPlacement.afterShare);
   }
 
   Future<void> report(Wallpaper wallpaper, ReportReason reason) async {

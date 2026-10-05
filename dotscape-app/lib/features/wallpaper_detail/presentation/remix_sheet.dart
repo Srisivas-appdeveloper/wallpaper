@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../app/theme/app_theme.dart';
+import '../../../core/ads/ads_service.dart';
 import '../../../shared/models/choices.dart';
 import '../../../shared/models/wallpaper.dart';
 import '../../../shared/widgets/choice_widgets.dart';
@@ -28,7 +29,10 @@ Future<void> startRemix(
     label: 'Remixing…',
   );
   if (result != null && context.mounted) {
-    await context.push(Routes.wallpaper(result.id), extra: result);
+    await ref.read(adsServiceProvider).onFlowCompleted(AdPlacement.afterRemix);
+    if (context.mounted) {
+      await context.push(Routes.wallpaper(result.id), extra: result);
+    }
   }
 }
 

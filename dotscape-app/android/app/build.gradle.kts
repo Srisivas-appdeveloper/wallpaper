@@ -30,6 +30,10 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
@@ -45,30 +49,12 @@ flutter {
 }
 
 // ---------------------------------------------------------------------------
-// DOTSCAPE — flavors (dev / staging / prod)
+// DOTSCAPE — Production configuration
 // ---------------------------------------------------------------------------
 android {
     defaultConfig {
         minSdk = 29
         manifestPlaceholders["appName"] = "DOTSCAPE"
     }
-    flavorDimensions += "env"
-    productFlavors {
-        create("dev") {
-            dimension = "env"
-            applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
-            manifestPlaceholders["appName"] = "DOTSCAPE Dev"
-        }
-        create("staging") {
-            dimension = "env"
-            applicationIdSuffix = ".staging"
-            versionNameSuffix = "-staging"
-            manifestPlaceholders["appName"] = "DOTSCAPE Staging"
-        }
-        create("prod") {
-            dimension = "env"
-            manifestPlaceholders["appName"] = "DOTSCAPE"
-        }
-    }
 }
+

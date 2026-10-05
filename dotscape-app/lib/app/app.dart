@@ -28,18 +28,7 @@ class _DotscapeAppState extends ConsumerState<DotscapeApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
       routerConfig: ref.watch(appRouterProvider),
-      builder: (context, child) {
-        final content = child ?? const SizedBox.shrink();
-        if (!config.showFlavorBanner) return content;
-        return Directionality(
-          textDirection: TextDirection.ltr,
-          child: Banner(
-            message: config.flavor.name.toUpperCase(),
-            location: BannerLocation.topEnd,
-            child: content,
-          ),
-        );
-      },
+      builder: (context, child) => child ?? const SizedBox.shrink(),
     );
   }
 }
